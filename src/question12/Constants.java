@@ -4,6 +4,9 @@ package question12;
  * @author Vasil Talkachou
  */
 public class Constants {
+
+    public static final String COMMAND_DROP_ALL_TABLES = "DROP TABLE items, orders, products;";
+
     public static final String COMMAND_CREATE_TABLE_ORDERS = "CREATE TABLE orders("
         + "order_id INT AUTO_INCREMENT, "
         + "order_date DATE NOT NULL, "
@@ -26,22 +29,30 @@ public class Constants {
         + "FOREIGN KEY (item_id) REFERENCES products (product_id)"
         + ")";
 
-    public static final String COMMAND_ADD_PRODUCT = "INSERT INTO products "
-        + "(product_name, product_info, product_cost) VALUES (?, ?);";
+    public static final String[] PRODUCTS = {
+        //  product_name, product_info, product_cost
+        "('phone', 'Android GSM phone Huawei', 150);",
+        "('laptop', 'laptop Lenovo', 250);",
+        "('TV', 'TV \"Horizont\"', 120)",
+        "('player', 'MP3 player Sony', 50);"
+    };
 
-    public static final String[] PRODUCTS_NAME_INFO = {
-//       product_name, product_info 
-        "phone, Android GSM phone Huawei, 150",
-        "laptop, laptop Lenovo, 250",
-        "TV, TV \"Horizont\", 120",
-        "player, MP3 player Sony, 50"
-        };
-    
-    public static final int[] PRODUCTS_COST = {
-        150,
-        250,
-        120,
-        50
+    public static final String[] ORDERS = {
+        //  order_id, order_date
+        "(1, '2016-02-08');",
+        "(2, '2016-03-14');",
+        "(3, '2016-04-05')",
+        "(4, '2016-05-11');"
     };
     
+    public static final String[] ITEMS = {
+        //  order_id, item_id, items_quantity
+        "(1, 1, 3);",
+        "(1, 3, 1);",
+        "(2, 2, 2)",
+        "(2, 3, 1);",
+        "(3, 1, 1);",
+        "(4, 3, 2);"
+    };
+
 }

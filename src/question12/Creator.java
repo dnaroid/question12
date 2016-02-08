@@ -53,8 +53,9 @@ public class Creator {
         }
     }
     
-    public static void createAllTables() {
+    public static void createTables() {
         try {
+            sendSQL(Constants.COMMAND_DROP_ALL_TABLES);
             sendSQL(Constants.COMMAND_CREATE_TABLE_ORDERS);
             sendSQL(Constants.COMMAND_CREATE_TABLE_PRODUCTS);
             sendSQL(Constants.COMMAND_CREATE_TABLE_ITEMS);
@@ -63,15 +64,40 @@ public class Creator {
         }
     }
     
-    public static void addAllProducts() {
+    public static void addProducts() {
         try {
-            for(int i = 0; i < Constants.PRODUCTS_COST.length; i++) {
-                sendPreparedSQL(Constants.COMMAND_ADD_PRODUCT,
-                                Constants.PRODUCTS_NAME_INFO[i],
-                                Constants.PRODUCTS_COST[i]);
+            for (String product : Constants.PRODUCTS) {
+                sendSQL("INSERT INTO products " +
+                        "(product_name, product_info, product_cost) VALUES " +
+                        product);
             } 
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         }
     }
+    
+    public static void addOrders() {
+        try {
+            for (String order : Constants.ORDERS) {
+                sendSQL("INSERT INTO orders "
+                    + "(order_id, order_date) VALUES "
+                    + order);
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    public static void addItems() {
+        try {
+            for (String item : Constants.ITEMS) {
+                sendSQL("INSERT INTO items "
+                    + "(order_id, item_id, items_quantity) VALUES "
+                    + item);
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    
 }
