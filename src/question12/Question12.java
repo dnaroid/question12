@@ -40,10 +40,8 @@ import java.sql.Connection;
 public class Question12 {
 
     public static void main(String[] args) {
-//        Connection dbConnection = null;
-        DBCreator.createAllTables();
-//        dbConnection = Connector.getDBConnection();
-//        DBCreator.createAllTables();
+        Creator.createAllTables();
+        Creator.addAllProducts();
     }
     
 }

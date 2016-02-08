@@ -9,18 +9,17 @@ import java.sql.Statement;
 /**
  * @author Vasil Talkachou
  */
-public class DBCreator {
+public class Creator {
     
-    private static void sendPreparedSQL(String text, String s1, String s2, int i1) throws SQLException {
+    private static void sendPreparedSQL(String text, String s1, int i2) throws SQLException {
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
 
         try {
             dbConnection = Connector.getDBConnection();
             preparedStatement = dbConnection.prepareStatement(text);
-            preparedStatement.setString(1, s2);
-            preparedStatement.setString(1, s2);
-            preparedStatement.setInt(3, i1);
+            preparedStatement.setString(1, s1);
+            preparedStatement.setInt(2, i2);
             preparedStatement.execute();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -56,9 +55,9 @@ public class DBCreator {
     
     public static void createAllTables() {
         try {
-            sendSQL(Constants.CREATE_TABLE_ORDERS);
-            sendSQL(Constants.CREATE_TABLE_PRODUCTS);
-            sendSQL(Constants.CREATE_TABLE_ITEMS_IN_ORDER);
+            sendSQL(Constants.COMMAND_CREATE_TABLE_ORDERS);
+            sendSQL(Constants.COMMAND_CREATE_TABLE_PRODUCTS);
+            sendSQL(Constants.COMMAND_CREATE_TABLE_ITEMS);
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         }
@@ -66,8 +65,11 @@ public class DBCreator {
     
     public static void addAllProducts() {
         try {
-            sendSQL("INSERT INTO products (product_name, product_info,product_cost) VALUES ('valera', 'valera@mail.ru', '2222');");
-               
+            for(int i = 0; i < Constants.PRODUCTS_COST.length; i++) {
+                sendPreparedSQL(Constants.COMMAND_ADD_PRODUCT,
+                                Constants.PRODUCTS_NAME_INFO[i],
+                                Constants.PRODUCTS_COST[i]);
+            } 
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         }
