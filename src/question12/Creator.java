@@ -1,16 +1,17 @@
-
 package question12;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Vasil Talkachou
  */
 public class Creator {
-    
+
     private static void sendPreparedSQL(String text, String s1, int i2) throws SQLException {
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
@@ -33,7 +34,7 @@ public class Creator {
         }
     }
 
-    private static void sendSQL(String text) throws SQLException {
+    public static void sendSQL(String text) {
         Connection dbConnection = null;
         Statement statement = null;
 
@@ -45,59 +46,50 @@ public class Creator {
             System.out.println(e.getMessage());
         } finally {
             if (statement != null) {
-                statement.close();
+                try {
+                    statement.close();
+                } catch (SQLException ex) {
+                    System.out.println(ex.getMessage());
+                }
             }
             if (dbConnection != null) {
-                dbConnection.close();
+                try {
+                    dbConnection.close();
+                } catch (SQLException ex) {
+                    System.out.println(ex.getMessage());
+                }
             }
         }
     }
-    
+
     public static void createTables() {
-        try {
-            sendSQL(Constants.COMMAND_DROP_ALL_TABLES);
-            sendSQL(Constants.COMMAND_CREATE_TABLE_ORDERS);
-            sendSQL(Constants.COMMAND_CREATE_TABLE_PRODUCTS);
-            sendSQL(Constants.COMMAND_CREATE_TABLE_ITEMS);
-        } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
-        }
+        sendSQL(Constants.COMMAND_DROP_ALL_TABLES);
+        sendSQL(Constants.COMMAND_CREATE_TABLE_ORDERS);
+        sendSQL(Constants.COMMAND_CREATE_TABLE_PRODUCTS);
+        sendSQL(Constants.COMMAND_CREATE_TABLE_ITEMS);
     }
-    
+
     public static void addProducts() {
-        try {
-            for (String product : Constants.PRODUCTS) {
-                sendSQL("INSERT INTO products " +
-                        "(product_name, product_info, product_cost) VALUES " +
-                        product);
-            } 
-        } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
-        }
+        for (String product : Constants.PRODUCTS) 
+            sendSQL("INSERT INTO products "
+                + "(product_name, product_info, product_cost) VALUES "
+                + product);
     }
-    
+
     public static void addOrders() {
-        try {
-            for (String order : Constants.ORDERS) {
-                sendSQL("INSERT INTO orders "
-                    + "(order_id, order_date) VALUES "
-                    + order);
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+        for (String order : Constants.ORDERS) {
+            sendSQL("INSERT INTO orders "
+                + "(order_id, order_date) VALUES "
+                + order);
         }
     }
-    
+
     public static void addItems() {
-        try {
-            for (String item : Constants.ITEMS) {
-                sendSQL("INSERT INTO items "
-                    + "(order_id, item_id, items_quantity) VALUES "
-                    + item);
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+        for (String item : Constants.ITEMS) {
+            sendSQL("INSERT INTO items "
+                + "(order_id, item_id, items_quantity) VALUES "
+                + item);
         }
     }
-    
+
 }
