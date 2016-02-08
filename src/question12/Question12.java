@@ -1,5 +1,7 @@
 package question12;
 
+import java.sql.Connection;
+
 /**
  * Задания к главе 12 
  * Вариант А 
@@ -38,7 +40,10 @@ package question12;
 public class Question12 {
 
     public static void main(String[] args) {
-        // TODO code application logic here
+//        Connection dbConnection = null;
+        DBCreator.createAllTables();
+//        dbConnection = Connector.getDBConnection();
+//        DBCreator.createAllTables();
     }
     
 }
