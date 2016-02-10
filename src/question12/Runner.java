@@ -37,7 +37,7 @@ import java.util.*;
  * 
  * @author Vasil Talkachou
  */
-public class Question12 {
+public class Runner {
 
     public static void main(String[] args) {
         DBCreator.createTables();
@@ -58,7 +58,7 @@ public class Question12 {
         Scanner sc = new Scanner(System.in);
         int sel = 0;
         do {
-            System.out.print("Select the order:");
+            System.out.print("Select the order for full info :");
             sel = sc.nextInt();
         } while(sel < 0 || sel > ordersNum);
         Order selOrder = getter.getOrder(sel);

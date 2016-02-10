@@ -171,3 +171,14 @@ public class DBGetter {
         }
     }
 }
+
+//SELECT 
+//order_id, 
+//product_name, 
+//product_cost,
+//items_quantity,
+//product_cost*items_quantity AS full
+//FROM items INNER JOIN products
+//ON items.product_id=products.product_id
+//-- AND order_id=1
+//ORDER BY items.order_id
