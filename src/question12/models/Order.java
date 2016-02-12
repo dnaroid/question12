@@ -1,6 +1,9 @@
-package question12;
+package question12.models;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 /**
  *
@@ -12,12 +15,19 @@ public class Order extends Entity {
 
     public Order() {
         this.date = new Timestamp(System.currentTimeMillis());
-        
     }
-    
+
     public Order(Timestamp date) {
         this.date = date;
+    }
 
+    public Order(ResultSet rs) {
+        try {
+            id = rs.getInt(1);
+            date = rs.getTimestamp(2);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override
@@ -39,5 +49,4 @@ public class Order extends Entity {
         this.date = date;
     }
 
-   
 }

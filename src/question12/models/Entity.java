@@ -1,4 +1,4 @@
-package question12;
+package question12.models;
 
 import java.io.Serializable;
 

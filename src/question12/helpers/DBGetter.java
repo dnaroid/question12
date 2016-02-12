@@ -1,5 +1,8 @@
-package question12;
+package question12.helpers;
 
+import question12.models.Order;
+import question12.models.Product;
+import question12.models.Item;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -23,6 +26,9 @@ public class DBGetter {
 
     public static final String COMMAND_GET_ITEMS_IN_ORDER
         = "SELECT * FROM items WHERE order_id=?";
+    
+    public static final String COMMAND_GET_ITEM_IDS_IN_ORDER
+        = "SELECT product_id FROM items WHERE order_id=?";
 
     public static final String COMMAND_GET_PRODUCT
         = "SELECT * FROM products WHERE product_id=?";
@@ -32,15 +38,15 @@ public class DBGetter {
         + "product_info,"
         + "product_cost, "
         + "items_quantity "
-        + "FROM items INNER JOIN products "
+        + "FROM items JOIN products "
         + "ON items.product_id=products.product_id "
-        + "AND order_id = ?";
+        + "WHERE order_id = ?";
 
     public static final String COMMAND_GET_ORDERS_WITH_ITEM
         = "SELECT order_id "
-        + "FROM items INNER JOIN products "
+        + "FROM items JOIN products "
         + "ON items.product_id = products.product_id "
-        + "AND items.product_id = ?";
+        + "WHERE items.product_id = ?";
 
     public static final String COMMAND_GET_ORDERS_TODAY
         = "SELECT order_id "
@@ -50,10 +56,23 @@ public class DBGetter {
     public static final String COMMAND_GET_ORDERS_TOTAL_AND_QTY
         = "SELECT COUNT(items.product_id), "
         + "SUM(items.items_quantity*products.product_cost) "
-        + "FROM items INNER JOIN products "
+        + "FROM items JOIN products "
         + "ON items.product_id = products.product_id "
         + "WHERE items.order_id = ?";
 
+    public static final String COMMAND_GET_ITEMS_TODAY
+        = "SELECT DISTINCT items.product_id "
+        + "FROM orders "
+        + "JOIN items ON orders.order_id = items.order_id "
+        + "WHERE TO_DAYS(NOW()) - TO_DAYS(orders.order_date) < 1";
+    
+    public static final String COMMAND_GET_ORDERS_BY_ITEM_AND_QTY 
+        = "SELECT items.order_id " 
+        + "FROM items JOIN products " 
+        + "ON items.product_id = products.product_id "
+        + "WHERE items.product_id = ? " 
+        + "AND items.items_quantity = ?";
+    
     private Connection connection;
     private PreparedStatement preparedStatement;
 
@@ -75,15 +94,17 @@ public class DBGetter {
         return num;
     }
 
-    public ArrayList<Integer> getIntList(String request, int num) {
-        ArrayList list = new ArrayList();
+    public ArrayList<Integer> getList(String request, Integer... args) {
+        ArrayList<Integer> list = new ArrayList();
         try {
             preparedStatement = connection.prepareStatement(request);
-            if (num >= 0) {
-                preparedStatement.setInt(1, num);
+            int idx = 1;
+            for(int arg : args)
+            {
+                preparedStatement.setInt(idx++, arg);
             }
             ResultSet rs = preparedStatement.executeQuery();
-            if (rs.next()) {
+            while (rs.next()) {
                 list.add(rs.getInt(1));
             }
         } catch (SQLException e) {
@@ -107,40 +128,18 @@ public class DBGetter {
         return order;
     }
 
+    //  номера заказов, содержащих заданный товар.
     public ArrayList<Integer> getOrdersWithItem(int itemId) {
-//        ArrayList list = new ArrayList();
-//        try {
-//            preparedStatement = connection.prepareStatement(COMMAND_GET_ORDERS_WITH_ITEM);
-//            preparedStatement.setInt(1, itemId);
-//            ResultSet rs = preparedStatement.executeQuery();
-//            while (rs.next()) {
-//                list.add(rs.getInt(1));
-//            }
-//        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
-//        }
-//        return list;
-        return getIntList(COMMAND_GET_ORDERS_WITH_ITEM, itemId);
+        return getList(COMMAND_GET_ORDERS_WITH_ITEM, itemId);
     }
 
+    //  номера заказов, НЕ содержащих заданный товар и поступивших в течение текущего дня. 
     public ArrayList<Integer> getOrdersExcludeItemToday(int itemId) {
         ArrayList list = new ArrayList();
-        try {
-            preparedStatement = connection.prepareStatement(COMMAND_GET_ORDERS_TODAY);
-            ResultSet rs = preparedStatement.executeQuery();
-            while (rs.next()) {
-                int order = rs.getInt(1);
-                for (Item i : getItemsInOrder(order)) {
-                    if (i.getProductId() == itemId) {
-                        order = 0;
-                    }
-                }
-                if (order > 0) {
-                    list.add(order);
-                }
+        for (int i : getList(COMMAND_GET_ORDERS_TODAY)) {
+            if (!getList(COMMAND_GET_ITEM_IDS_IN_ORDER, i).contains(itemId)) {
+                list.add(i);
             }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
         }
         return list;
     }
@@ -218,6 +217,8 @@ public class DBGetter {
         return prod;
     }
 
+    // номера заказов, сумма которых не превосходит заданную 
+    //  и количество различных товаров равно заданному
     public ArrayList<Integer> getOrdersTotalQty(int number, int total, int qty) {
         ArrayList list = new ArrayList();
         try {
@@ -226,7 +227,7 @@ public class DBGetter {
                 preparedStatement.setInt(1, i);
                 ResultSet rs = preparedStatement.executeQuery();
                 if (rs.next()) {
-                    int q = rs.getInt(1);
+                    int q = rs.getInt(1); 
                     int t = rs.getInt(2);
                     if (q == qty && t <= total) {
                         list.add(i);
@@ -237,6 +238,15 @@ public class DBGetter {
             System.out.println(e.getMessage());
         }
         return list;
+    }
+    
+    // все заказы, в которых присутствует заданное количество заданного товара.
+    public ArrayList<Integer> getOrdersByItemsQty(int itemId, int qty) {
+        return getList(COMMAND_GET_ORDERS_BY_ITEM_AND_QTY, itemId, qty);
+    }
+
+    public ArrayList<Integer> getProductsToday() {
+        return getList(COMMAND_GET_ITEMS_TODAY);
     }
 
     public void closeStatement() {
@@ -259,14 +269,3 @@ public class DBGetter {
         }
     }
 }
-
-//SELECT 
-//order_id, 
-//product_name, 
-//product_cost,
-//items_quantity,
-//product_cost*items_quantity AS full
-//FROM items INNER JOIN products
-//ON items.product_id=products.product_id
-//-- AND order_id=1
-//ORDER BY items.order_id

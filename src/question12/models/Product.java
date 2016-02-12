@@ -1,5 +1,8 @@
 
-package question12;
+package question12.models;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  *
@@ -12,6 +15,17 @@ public class Product extends Entity {
     private int cost;
 
     public Product() {
+    }
+    
+    public Product(ResultSet rs) {
+        try {
+            super.id = rs.getInt(1);
+            this.name = rs.getString(2);
+            this.info = rs.getString(3);
+            this.cost = rs.getInt(4);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public Product(String name, String info, int cost) {
