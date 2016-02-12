@@ -28,19 +28,20 @@ import java.util.*;
  * — цену. 
  * 
  * + Вывести полную информацию о заданном заказе. 
- * • Вывести номера заказов, сумма которых не превосходит заданную 
+ * + Вывести номера заказов, сумма которых не превосходит заданную 
  *   и количество различных товаров равно заданному. 
  * + Вывести номера заказов, содержащих заданный товар. 
- * • Вывести номера заказов, не содержащих заданный товар и поступивших в течение текущего дня. 
- * • Сформировать новый заказ, состоящий из товаров, заказанных в текущий день. 
- * • Удалить все заказы, в которых присутствует заданное количество заданного товара.
+ * + Вывести номера заказов, НЕ содержащих заданный товар и поступивших в течение текущего дня. 
+ * + Сформировать новый заказ, состоящий из товаров, заказанных в текущий день. 
+ * + Удалить все заказы, в которых присутствует заданное количество заданного товара.
  * 
  * @author Vasil Talkachou
  */
 public class Runner {
 
     public static void main(String[] args) {
-
+        
+        DBCreator.dropTables();
         DBCreator.createTables();
         DBCreator.addProducts();
         DBCreator.addOrders();
@@ -50,48 +51,72 @@ public class Runner {
 
         int ordersNum = getter.getInt(DBGetter.COMMAND_GET_ORDERS_NUMBER);
         int prodNum = getter.getInt(DBGetter.COMMAND_GET_PRODUCTS_NUMBER);
-        System.out.println("Количество заказов:" + ordersNum);
+
+        printList(getter.getOrders());
+        System.out.println("\nКоличество заказов:" + ordersNum);
         System.out.println("Количество товаров:" + prodNum);
 
-        for (Order o : getter.getOrders()) {
-            System.out.println(o.toString());
-        }
-
         Scanner sc = new Scanner(System.in);
-        int sel = 0;
-        do {
-            System.out.print("\nВведите номер заказа для детальной информации:");
-            sel = sc.nextInt();
-        } while (sel < 0 || sel > ordersNum);
-        for (String s : getter.getOrderInfo(sel)) {
-            System.out.println(s);
-        }
+        System.out.print("\nВведите номер заказа для детальной информации:");
+        int sel = sc.nextInt();
+        printList(getter.getOrderInfo(sel));
+        
+        System.out.println("\nВывести номера заказов, сумма которых не превосходит заданную \n"
+                         + " и количество различных товаров равно заданному. ");
+        System.out.print("Введите максимальную сумму:");
+        int total = sc.nextInt();
+        System.out.print("Введите количество товаров:");
+        int qty = sc.nextInt();
+        printList(getter.getOrdersTotalQty(ordersNum, total, qty));
 
         System.out.println("\nВывести номера заказов, содержащих заданный товар.");
-        sel = 0;
-        do {
-            System.out.print("Введите код товара:");
-            sel = sc.nextInt();
-        } while (sel < 0 || sel > prodNum);
-        for (int i : getter.getOrdersWithItem(sel)) {
-            System.out.println(i);
-        }
+        System.out.print("Введите код товара:");
+        sel = sc.nextInt();
+        printList(getter.getOrdersWithItem(sel));
         
         System.out.println("\nВывести номера заказов, \n не содержащих "
-            + "заданный товар \n и поступивших в течение текущего дня.");
-        sel = 0;
-        do {
-            System.out.print("Введите код товара:");
-            sel = sc.nextInt();
-        } while (sel < 0 || sel > prodNum);
-        for (int i : getter.getOrdersExcludeItemToday(sel)) {
-            System.out.println(i);
+                         + "заданный товар \n и поступивших в течение текущего дня.");
+        System.out.print("Введите код товара:");
+        sel = sc.nextInt();
+        printList(getter.getOrdersExcludeItemToday(sel));
+        
+        System.out.println("\nСформировать новый заказ, состоящий из товаров,\n"
+                         + "заказанных в текущий день. ");
+        DBModifier mod = new DBModifier();
+        int newOrder = ordersNum + 1 ;
+        mod.insertOrder(new Order());
+        for (int i : getter.getProductsToday()) {
+            mod.insertItem(new Item(newOrder, i, 1));
+        }
+        printList(getter.getOrderInfo(newOrder));
+        
+        System.out.println("\nУдалить все заказы, в которых присутствует "
+                         + "заданное количество заданного товара. ");
+        System.out.print("Введите код товара:");
+        int itemId = sc.nextInt();
+        System.out.print("Введите количество товаров:");
+        qty = sc.nextInt();
+        ArrayList<Integer> delOrders = getter.getOrdersByItemsQty(itemId, qty);
+        for(int id : delOrders) {
+            System.out.println("  Удаляется заказ номер:" + id);
+            mod.deleteOrder(id);
         }
         
-        
-        
+        mod.closeStatement();
+        mod.closeConnection();
         getter.closeStatement();
         getter.closeConnection();
+    }
+    
+    public static void printList(ArrayList list) {
+        if(list.isEmpty()) {
+            System.out.println("<пусто>");
+        } else {
+            for(Object s : list) {
+                System.out.println("   " + s.toString());
+            }
+        }
+        
     }
 
 }
